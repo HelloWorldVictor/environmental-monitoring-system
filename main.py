@@ -1,4 +1,11 @@
-from cli import handle_fetch_data, handle_query_historical, handle_show_latest, print_header, print_menu
+from cli import (
+    handle_fetch_data,
+    handle_query_historical,
+    handle_set_thresholds,
+    handle_show_latest,
+    print_header,
+    print_menu,
+)
 from db_handler import initialize_db
 
 
@@ -18,7 +25,7 @@ def main():
         elif choice == "3":
             handle_query_historical()
         elif choice == "4":
-            pass
+            handle_set_thresholds()
         elif choice == "5":
             pass
         elif choice == "6":

@@ -7,7 +7,13 @@ from rich.table import Table
 
 from alerter import check_thresholds
 from api_handler import fetch_and_parse_data
-from db_handler import get_historical_data, get_latest_readings, save_data
+from db_handler import (
+    get_historical_data,
+    get_latest_readings,
+    get_thresholds,
+    save_data,
+    set_threshold,
+)
 
 
 console = Console()
@@ -69,6 +75,7 @@ def handle_fetch_data():
     except Exception as e:
         console.print(f"[bold red]An error occurred: {e}[/bold red]")
 
+
 def handle_show_latest():
     """Handles displaying the most recent readings."""
     clear_screen()
@@ -107,6 +114,7 @@ def handle_show_latest():
 
     console.print(table)
 
+
 def handle_query_historical():
     """Handles querying and displaying historical data."""
     clear_screen()
@@ -139,5 +147,43 @@ def handle_query_historical():
         console.print(
             "[bold red]Invalid date format. Please use YYYY-MM-DD.[/bold red]"
         )
+    except Exception as e:
+        console.print(f"[bold red]An error occurred: {e}[/bold red]")
+
+
+def handle_set_thresholds():
+    """Handles setting new safety thresholds."""
+    clear_screen()
+    console.print("\n[bold blue]Current thresholds:[/bold blue]")
+    thresholds = get_thresholds()
+
+    threshold_table = Table(title="Current Safety Thresholds", style="magenta")
+    threshold_table.add_column("Metric", style="bold")
+    threshold_table.add_column("Min", style="green")
+    threshold_table.add_column("Max", style="red")
+
+    for metric, values in thresholds.items():
+        min_val = f"{values.get('min', 'N/A')}"
+        max_val = f"{values.get('max', 'N/A')}"
+        threshold_table.add_row(metric.capitalize(), min_val, max_val)
+
+    console.print(threshold_table)
+
+    console.print("\n[bold blue]Enter new threshold (leave blank to skip):[/bold blue]")
+    metric = console.input("[bold]Enter metric (e.g., temperature): [/bold]").lower()
+    if not metric:
+        return
+
+    try:
+        min_val_str = console.input(f"[bold]Enter new min for {metric}: [/bold]")
+        max_val_str = console.input(f"[bold]Enter new max for {metric}: [/bold]")
+
+        min_val = float(min_val_str) if min_val_str else None
+        max_val = float(max_val_str) if max_val_str else None
+
+        set_threshold(metric, min_val, max_val)
+        console.print(f"[bold green]Threshold for {metric} updated.[/bold green]")
+    except ValueError:
+        console.print("[bold red]Invalid input. Please enter a number.[/bold red]")
     except Exception as e:
         console.print(f"[bold red]An error occurred: {e}[/bold red]")
