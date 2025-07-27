@@ -68,3 +68,17 @@ def get_latest_readings():
         keys = [description[0] for description in cursor.description]
         return dict(zip(keys, row))
     return None
+
+def get_historical_data(start_date, end_date):
+    """Retrieves data within a specified date range."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM readings WHERE timestamp BETWEEN ? AND ?",
+        (start_date, end_date)
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    # Return as a list of dictionaries
+    keys = [description[0] for description in cursor.description]
+    return [dict(zip(keys, row)) for row in rows]
