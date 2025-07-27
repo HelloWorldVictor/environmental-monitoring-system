@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 from rich.console import Console
 from rich.panel import Panel
@@ -6,7 +7,7 @@ from rich.table import Table
 
 from alerter import check_thresholds
 from api_handler import fetch_and_parse_data
-from db_handler import get_latest_readings, save_data
+from db_handler import get_historical_data, get_latest_readings, save_data
 
 
 console = Console()
@@ -105,3 +106,38 @@ def handle_show_latest():
     table.add_row("PM10", safe_format(readings.get("pm10"), "{:.2f} µg/m³"), timestamp)
 
     console.print(table)
+
+def handle_query_historical():
+    """Handles querying and displaying historical data."""
+    clear_screen()
+    console.print("\n[bold blue]Query historical data:[/bold blue]")
+
+    try:
+        start_str = console.input("[bold]Enter start date (YYYY-MM-DD): [/bold]")
+        end_str = console.input("[bold]Enter end date (YYYY-MM-DD): [/bold]")
+        start_date = datetime.strptime(start_str, "%Y-%m-%d")
+        end_date = datetime.strptime(end_str, "%Y-%m-%d")
+
+        data = get_historical_data(start_date, end_date)
+        if not data:
+            console.print(
+                "[bold yellow]No data found for the specified range.[/bold yellow]"
+            )
+            return
+
+        history_table = Table(title="Historical Environmental Data", style="cyan")
+        # Dynamically add columns based on the keys of the first data entry
+        for key in data[0].keys():
+            history_table.add_column(key.replace("_", " ").title(), style="bold")
+
+        for row_data in data:
+            history_table.add_row(*[str(value) for value in row_data.values()])
+
+        console.print(history_table)
+
+    except ValueError:
+        console.print(
+            "[bold red]Invalid date format. Please use YYYY-MM-DD.[/bold red]"
+        )
+    except Exception as e:
+        console.print(f"[bold red]An error occurred: {e}[/bold red]")

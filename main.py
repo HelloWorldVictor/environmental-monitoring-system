@@ -1,4 +1,4 @@
-from cli import handle_fetch_data, handle_show_latest, print_header, print_menu
+from cli import handle_fetch_data, handle_query_historical, handle_show_latest, print_header, print_menu
 from db_handler import initialize_db
 
 
@@ -16,7 +16,7 @@ def main():
         elif choice == "2":
             handle_show_latest()
         elif choice == "3":
-            pass
+            handle_query_historical()
         elif choice == "4":
             pass
         elif choice == "5":
