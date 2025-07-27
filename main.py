@@ -3,6 +3,7 @@ from cli import (
     handle_query_historical,
     handle_set_thresholds,
     handle_show_latest,
+    handle_view_tips,
     print_header,
     print_menu,
 )
@@ -27,7 +28,7 @@ def main():
         elif choice == "4":
             handle_set_thresholds()
         elif choice == "5":
-            pass
+            handle_view_tips()
         elif choice == "6":
             print("\nExiting. Stay safe!\n")
             break

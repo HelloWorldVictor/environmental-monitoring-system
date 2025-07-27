@@ -4,6 +4,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 from rich.table import Table
+from rich.markdown import Markdown
 
 from alerter import check_thresholds
 from api_handler import fetch_and_parse_data
@@ -14,6 +15,7 @@ from db_handler import (
     save_data,
     set_threshold,
 )
+from tips import get_tips
 
 
 console = Console()
@@ -187,3 +189,26 @@ def handle_set_thresholds():
         console.print("[bold red]Invalid input. Please enter a number.[/bold red]")
     except Exception as e:
         console.print(f"[bold red]An error occurred: {e}[/bold red]")
+
+
+def handle_view_tips():
+    """Handles displaying health and safety tips."""
+    clear_screen()
+    console.print("\n[bold blue]Fetching health and safety tips...[/bold blue]")
+
+    latest_data = get_latest_readings()
+    if not latest_data:
+        console.print(
+            "[bold yellow]No data available to generate tips. Fetch data first.[/bold yellow]"
+        )
+        return
+
+    alerts = check_thresholds(latest_data)
+    tips = get_tips(alerts)
+    if tips:
+        for tip in tips:
+            console.print(Panel(Markdown(tip), border_style="green"))
+    else:
+        console.print(
+            "[italic green]No specific tips for current conditions. All good![/italic green]"
+        )
