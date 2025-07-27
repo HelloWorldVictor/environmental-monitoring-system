@@ -82,3 +82,26 @@ def get_historical_data(start_date, end_date):
     # Return as a list of dictionaries
     keys = [description[0] for description in cursor.description]
     return [dict(zip(keys, row)) for row in rows]
+
+def get_thresholds():
+    """Retrieves the current safety thresholds."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT metric, min_val, max_val FROM thresholds")
+    rows = cursor.fetchall()
+    conn.close()
+    thresholds = {}
+    for row in rows:
+        thresholds[row[0]] = {"min": row[1], "max": row[2]}
+    return thresholds
+
+def set_threshold(metric, min_val, max_val):
+    """Sets or updates a safety threshold."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT OR REPLACE INTO thresholds (metric, min_val, max_val)
+        VALUES (?, ?, ?)
+    """, (metric, min_val, max_val))
+    conn.commit()
+    conn.close()
