@@ -37,3 +37,34 @@ def initialize_db():
     )
     conn.commit()
     conn.close()
+
+def save_data(data):
+    """Saves a new data reading to the database."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO readings (temperature, humidity, co2, co, pm25, pm10)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+        data.get("temperature"),
+        data.get("humidity"),
+        data.get("co2"),
+        data.get("co"),
+        data.get("pm25"),
+        data.get("pm10")
+    ))
+    conn.commit()
+    conn.close()
+
+def get_latest_readings():
+    """Retrieves the most recent data reading."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM readings ORDER BY timestamp DESC LIMIT 1")
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        # Return as a dictionary
+        keys = [description[0] for description in cursor.description]
+        return dict(zip(keys, row))
+    return None
