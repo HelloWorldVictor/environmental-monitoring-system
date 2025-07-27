@@ -1,4 +1,4 @@
-from cli import handle_fetch_data, print_header, print_menu
+from cli import handle_fetch_data, handle_show_latest, print_header, print_menu
 from db_handler import initialize_db
 
 
@@ -14,7 +14,7 @@ def main():
         if choice == "1":
             handle_fetch_data()
         elif choice == "2":
-            pass
+            handle_show_latest()
         elif choice == "3":
             pass
         elif choice == "4":

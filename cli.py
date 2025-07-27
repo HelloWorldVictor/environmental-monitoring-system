@@ -2,10 +2,11 @@ import os
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
+from rich.table import Table
 
 from alerter import check_thresholds
 from api_handler import fetch_and_parse_data
-from db_handler import save_data
+from db_handler import get_latest_readings, save_data
 
 
 console = Console()
@@ -66,3 +67,41 @@ def handle_fetch_data():
             )
     except Exception as e:
         console.print(f"[bold red]An error occurred: {e}[/bold red]")
+
+def handle_show_latest():
+    """Handles displaying the most recent readings."""
+    clear_screen()
+    console.print("\n[bold blue]Fetching latest readings...[/bold blue]")
+    readings = get_latest_readings()
+    if not readings:
+        console.print("[bold yellow]No data available. Fetch data first.[/bold yellow]")
+        return
+
+    table = Table(title="Latest Environmental Readings", style="cyan")
+    table.add_column("Metric", style="bold")
+    table.add_column("Value", style="green")
+    table.add_column("Timestamp", style="dim")
+
+    timestamp = readings.get("timestamp", "N/A")
+
+    table.add_row(
+        "Temperature", f"{readings.get('temperature', 'N/A'):.2f} °C", timestamp
+    )
+
+    def safe_format(value, fmt, default="N/A"):
+        try:
+            if value is None:
+                return default
+            return fmt.format(value)
+        except Exception:
+            return default
+
+    table.add_row(
+        "Humidity", safe_format(readings.get("humidity"), "{:.2f} %"), timestamp
+    )
+    table.add_row("CO2", safe_format(readings.get("co2"), "{:.2f} ppm"), timestamp)
+    table.add_row("CO", safe_format(readings.get("co"), "{:.3f} ppm"), timestamp)
+    table.add_row("PM2.5", safe_format(readings.get("pm25"), "{:.2f} µg/m³"), timestamp)
+    table.add_row("PM10", safe_format(readings.get("pm10"), "{:.2f} µg/m³"), timestamp)
+
+    console.print(table)
