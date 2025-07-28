@@ -8,6 +8,7 @@ from rich.markdown import Markdown
 
 from alerter import check_thresholds
 from api_handler import fetch_and_parse_data
+from config import DEFAULT_THRESHOLDS
 from db_handler import (
     get_historical_data,
     get_latest_readings,
@@ -29,7 +30,7 @@ def clear_screen():
 def print_header():
     """Prints the application header with rich styling."""
     clear_screen()
-    header_text = Text("ENVIRONMENTAL MONITORING – CLI v1.0", style="bold yellow")
+    header_text = Text("STORM SURVIVOR⛈️ – CLI v1.0", style="bold yellow")
     panel = Panel(header_text, border_style="blue", width=50, highlight=True)
     console.print(panel, justify="center")
 
@@ -174,6 +175,9 @@ def handle_set_thresholds():
     console.print("\n[bold blue]Enter new threshold (leave blank to skip):[/bold blue]")
     metric = console.input("[bold]Enter metric (e.g., temperature): [/bold]").lower()
     if not metric:
+        return
+    if metric not in DEFAULT_THRESHOLDS.keys():
+        console.print(f"[bold yellow]Unknown metric: {metric}[/bold yellow]")
         return
 
     try:
